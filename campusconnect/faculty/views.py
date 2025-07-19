@@ -41,6 +41,8 @@ class AssignmentView(APIView):
         id = request.data.get('id')
         assignmen_data = Assignment.objects.filter(id=id).exists()
         if assignmen_data:
+            
+            assignmen_data = Assignment.objects.get(id=id)
             serializer_data = AssignmentSerializer(assignmen_data,data=request.data,partial=True)
             if serializer_data.is_valid():
                 serializer_data.save()
@@ -66,13 +68,18 @@ class AssignmentSubmissionView(APIView):
         if request.user.role != 'teacher':
             return Response({'message':'You dont have permission'},status=status.HTTP_400_BAD_REQUEST)
         id = request.data.get('id')
-        assignmen_data = AssignmentSubmission.objects.filter(id=id).exists()
-        if assignmen_data:
-            serializer_data = AssignmentSubmissionSerializer(assignmen_data,data=request.data,partial=True)
+        assignment_data = AssignmentSubmission.objects.filter(id=id).exists()
+        if assignment_data:
+            print(assignment_data)
+            assignment_data = AssignmentSubmission.objects.get(id=id)
+            serializer_data = AssignmentSubmissionSerializer(assignment_data,data=request.data,partial=True)
+            print(serializer_data,'ieugdsysd')
             if serializer_data.is_valid():
+                print(serializer_data,'ieugdsysd')
                 serializer_data.save()
-            return Response(serializer_data.data,status=status.HTTP_200_OK)
-        return Response(serializer_data.errors,status=status.HTTP_400_BAD_REQUEST)
+                return Response(serializer_data.data,status=status.HTTP_200_OK)
+            return Response(serializer_data.errors,status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message':'no data found'},status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self,request):
         if request.user.role != 'teacher':

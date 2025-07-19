@@ -12,9 +12,9 @@ from .serializers import *
 
 
 class DepartmentView(APIView):
+    authentication_classes=[TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self,request):
-        if request.user.role != 'admin':
-            return Response({'message':'You dont have permission'},status=status.HTTP_400_BAD_REQUEST)
         department = Department.objects.all()
         serializer_data = DepartmentSerializer(department,many=True)
         return Response(serializer_data.data,status=status.HTTP_200_OK) 
@@ -32,8 +32,10 @@ class DepartmentView(APIView):
         if request.user.role != 'admin':
             return Response({'message':'You dont have permission'},status=status.HTTP_400_BAD_REQUEST)
         id=request.data.get('id')
+        
         department = Department.objects.filter(id=id).exists()
         if department:
+            department = Department.objects.get(id=id)
             serializer_data = DepartmentSerializer(department,data=request.data,partial=True)
             if serializer_data.is_valid():
                 serializer_data=serializer_data.save()
@@ -53,7 +55,8 @@ class DepartmentView(APIView):
     
     
 class Semesterview(APIView):
-    
+    authentication_classes=[TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def post(self,request):
         if request.user.role != 'admin':
             return Response({'message':'You dont have permission'},status=status.HTTP_400_BAD_REQUEST)
@@ -63,8 +66,6 @@ class Semesterview(APIView):
             return Response(serializer_data.data,status=status.HTTP_200_OK)
         return Response(serializer_data.errors,status=status.HTTP_400_BAD_REQUEST)
     def get(self,request):
-        if request.user.role != 'admin':
-            return Response({'message':'You dont have permission'},status=status.HTTP_400_BAD_REQUEST)
         semester_data = Semester.objects.all()
         serializer_data = SemesterSerializer(semester_data,many=True)
         return Response(serializer_data.data)
@@ -75,6 +76,7 @@ class Semesterview(APIView):
         id=request.data.get('id')
         semester = Semester.objects.filter(id=id).exists()
         if semester:
+            semester =Semester.objects.get(id=id)
             serializer_data = SemesterSerializer(semester,data=request.data,partial=True)
             if serializer_data.is_valid():
                 serializer_data=serializer_data.save()
@@ -113,6 +115,8 @@ class SubjectView(APIView):
         subject_id = request.data.get('id')
         subject_data = Subjects.objects.filter(id=subject_id).exists()
         if subject_data:
+            subject_data = Subjects.objects.get(id=subject_id)
+            
             serializer_data = SubjectSerializer(subject_data,data=request.data, partial= True)
             if serializer_data.is_valid():
                 serializer_data.save()

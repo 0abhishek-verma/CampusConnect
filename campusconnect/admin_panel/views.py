@@ -13,8 +13,8 @@ from students.models import StudentProfile
 from faculty.models import FacultyProfile
 # Create your views here.
 class StudentProfileCreation(APIView):
-    # permission_classes = [IsAdminUser]
-    # authentication_classes =[TokenAuthentication]
+    permission_classes = [IsAdminUser]
+    authentication_classes =[TokenAuthentication]
     def get(self, request):
         profiles = StudentProfile.objects.all()
         serializer = StudentProfileSerializer(profiles, many=True)
@@ -23,7 +23,7 @@ class StudentProfileCreation(APIView):
     def post(self, request):
         serializer = StudentProfileSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user = request.user)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -55,7 +55,7 @@ class FacultyProfileCreation(APIView):
     def post(self, request):
         serializer = FacultyProfileSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user = request.user)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     

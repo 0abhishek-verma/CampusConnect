@@ -13,6 +13,8 @@ from .models import *
 # Create your views here.
 
 class UserRegisterView(APIView):
+    permission_classes=[IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
     def post(self,request):
         data = request.data.copy()
         if data.get('role','').lower() == 'admin':
@@ -36,15 +38,23 @@ class UserRegisterView(APIView):
         print('fdianvieafvid',id)
         user = CustomUser.objects.filter(id=id).first()
         if user:
+            user = CustomUser.objects.get(id=id)
+            
             serializer = UserRegisterSerializer(user, data=request.data, partial= True)
             if serializer.is_valid():
-                profile = serializer.save()
-            return Response(UserRegisterSerializer(profile).data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                user = serializer.save()
+                user.set_password(request.data.get('password'))
+                user.save()
+                return Response(serializer.data,status=status.HTTP_200_OK)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            
+        return Response({'message':'ID does not exists'}, status=status.HTTP_400_BAD_REQUEST)
             
     def delete(self,request):
         id = request.data.get('id')
+        print(id,'cdijbcifiudigadccdugasdsdsade')
         custom_data = CustomUser.objects.filter(id=id).exists()
+        print(custom_data,'uhfsipyergsofyedsfuds7weudv')
         if custom_data:
             CustomUser.objects.get(id=id).delete()
             return Response({'message':'Deleted Successfully'},status=status.HTTP_200_OK)
@@ -57,6 +67,7 @@ class LoginView(APIView):
         password =request.data.get('password')
         
         user = authenticate(username=username,password=password)
+        print(user)
         if user:
             token,_ =Token.objects.get_or_create(user=user)
             return Response(
